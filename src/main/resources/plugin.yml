@@ -1,0 +1,11 @@
+name: SlapperAPI
+main: io.fallentech.slapperAPI.SlapperAPI
+version: "{project.version}"
+
+api: [ "1.0.0" ]
+load: STARTUP
+
+authors: [ "haappi" ]
+description: "{project.description}"
+website: https://github.com/FallentechPE/SlapperAPI
+prefix: "Slapper"

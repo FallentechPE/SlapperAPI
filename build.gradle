@@ -1,0 +1,77 @@
+plugins {
+    id "java"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "maven-publish"
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url "https://www.jitpack.io" }
+    maven { url "https://repo.opencollab.dev/maven-snapshots" }
+    maven { url "https://repo.opencollab.dev/maven-releases/" }}
+
+version = "0.0.2"
+group = "io.fallentech"
+description = "Simple SlapperAPI for PowerNukkit"
+ext {
+    artifactID = "SlapperAPI"
+}
+
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+dependencies {
+    compileOnly("cn.powernukkitx:powernukkitx:1.20.10-r1")
+    compileOnly("com.nukkitx:natives:1.0.3")
+}
+
+assemble.dependsOn shadowJar
+
+processResources {
+    filter { String line ->
+        line.replaceAll(/\{project\.(\w+)\}/) { match ->
+            def propertyName = match[1]
+            if (project.hasProperty(propertyName)) {
+                return project[propertyName].toString()
+            } else {
+                return match
+            }
+        }
+    }
+}
+
+shadowJar {
+    def finalJarName = "${project.name}-${version}-all.jar"
+    archiveFileName.set(finalJarName)
+
+    def relocateDependency = { String packageName ->
+        relocate(
+                packageName, "${group}.${artifactID}.dependency." + packageName
+        )
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = "${group}"
+            artifactId = "${artifactID}"
+            version = "${version}"
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/FallenTechPE/SlapperAPI"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
